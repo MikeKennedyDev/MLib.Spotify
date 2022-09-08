@@ -1,5 +1,7 @@
 import Utilities
 import requests
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
 
 from SpotifyTrack import SpotifyTrack
 
@@ -8,36 +10,32 @@ class SpotifyPlaylist:
 
     # region Constructors
 
-    def __init__(self, playlist_id, auth_token):
-        self.__track_api_address = None
-        self.__playlist_id = playlist_id
-        self.__playlist_api_address = Utilities.GetPlaylistUri(playlist_id)
-        self.__headers = {'Authorization': f'Bearer {auth_token}'}
-        self.__playlist = requests.get(self.__playlist_api_address, headers=self.__headers).json()
-        # TODO: Throw here if there's not playlist
+    def __init__(self, auth_manager, playlist_id):
+        print(f'Creating playlist with id: {playlist_id}')
+        if 'playlist-read-collaborative' not in auth_manager.scope:
+            print("you shouldn't be here")
+            # TODO: throw error on bad scope
 
         self.PlaylistId = playlist_id
-        self.Name = self.__playlist['name']
-        self.Tracks = self.__getAllTracks(self.__playlist['tracks']['items'])
+
+        self.__auth_manager = auth_manager
+        self.__spotify = spotipy.Spotify(auth_manager=auth_manager)
+        self.__allTracks = self.GetAllTracks(force_refresh=True)
 
     # endregion
 
     # region Methods
 
-    def __getAllTracks(self, raw_tracks):
-        print('Populating tracks...')
-        allTracks = []
-        for track in raw_tracks:
-            allTracks.append(SpotifyTrack(track['track']['id'], self.__headers))
-        print(f'Playlist object "{self.Name}" populated with {len(allTracks)} tracks')
-        return allTracks
+    def GetAllTracks(self, force_refresh=False):
+        if not force_refresh:
+            return self.__allTracks
+        self.__allTracks = [item['track'] for item in
+                            self.__spotify.playlist_items(playlist_id=self.PlaylistId)['items']]
+        return self.__allTracks
 
-    def AddTrack(self, spotifyTrack):
-        print(f'adding "{spotifyTrack.Name}" to playlist "{self.Name}"')
-        self.__track_api_address = Utilities.PostTrackUri(self.__playlist_id)
-        headers = {'spotify:track': spotifyTrack.Track_id}
-        response = requests.post(self.__track_api_address, headers=headers)
-        # TODO: Add error handling for failure
-        print(response)
+    def AddTrack(self, track_id):
+
+        return
+        # if trackId in [self.__allTracks['id']]:
 
     # endregion
