@@ -1,25 +1,31 @@
+import GlobalSettings
 import Utilities
-import requests
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth
-
-from SpotifyTrack import SpotifyTrack
+from spotipy import SpotifyOAuth
 
 
 class SpotifyPlaylist:
 
     # region Constructors
 
-    def __init__(self, auth_manager, playlist_id):
-        print(f'Creating playlist with id: {playlist_id}')
-        if 'playlist-read-collaborative' not in auth_manager.scope:
+    def __init__(self, scope, playlist_id):
+        print(f'Modelling playlist with id: {playlist_id}')
+
+        auth_man = SpotifyOAuth(
+            client_id=GlobalSettings.CLIENT_ID,
+            client_secret=GlobalSettings.CLIENT_SECRET,
+            redirect_uri=Utilities.RedirectAddress,
+            scope=scope)
+
+        if 'playlist-read-collaborative' not in auth_man.scope:
             print("you shouldn't be here")
+            return
             # TODO: throw error on bad scope
 
         self.PlaylistId = playlist_id
 
-        self.__auth_manager = auth_manager
-        self.__spotify = spotipy.Spotify(auth_manager=auth_manager)
+        self.__auth_manager = auth_man
+        self.__spotify = spotipy.Spotify(auth_manager=auth_man)
         self.__allTracks = self.GetAllTracks(force_refresh=True)
 
     # endregion
@@ -33,9 +39,10 @@ class SpotifyPlaylist:
                             self.__spotify.playlist_items(playlist_id=self.PlaylistId)['items']]
         return self.__allTracks
 
-    def AddTrack(self, track_id):
-
-        return
-        # if trackId in [self.__allTracks['id']]:
+    def AddTrack(self, tracks):
+        print('Adding tracks:')
+        for track in tracks:
+            print(track)
+        self.__spotify.playlist_add_items(self.PlaylistId, tracks)
 
     # endregion
