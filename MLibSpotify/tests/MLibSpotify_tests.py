@@ -1,6 +1,7 @@
 from MLibSpotify.MLibSpotify.SpotifyPlaylist import SpotifyPlaylist
 from MLibSpotify.MLibSpotify.SpotifyPlaylist import AuthorizationValues
 import GlobalSettings
+import MLibSpotify.MLibSpotify.Utilities as Util
 
 # region Fields
 
@@ -52,8 +53,17 @@ def TrackAddTest():
 
 # region Run tests
 
-AuthorizationTest()
-GetTracksTest()
-TrackAddTest()
+# AuthorizationTest()
+# GetTracksTest()
+# TrackAddTest()
+
+message = "Here's more: https://open.spotify.com/track/0irYSFrgXf2OH1F5NAdK6I?si=0e85a2bb98714998"
+urls = Util.ExtractLinks(message)
+print(f'Urls from message:')
+for url in urls:
+    print(f'Url: {url}')
+    id = Util.GetUri(url)
+    print(f'Uri: {id}')
+    print()
 
 # endregion
