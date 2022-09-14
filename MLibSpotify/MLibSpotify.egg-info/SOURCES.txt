@@ -1,0 +1,9 @@
+README.md
+setup.py
+MLibSpotify/SpotifyPlaylist.py
+MLibSpotify/__init__.py
+MLibSpotify.egg-info/PKG-INFO
+MLibSpotify.egg-info/SOURCES.txt
+MLibSpotify.egg-info/dependency_links.txt
+MLibSpotify.egg-info/requires.txt
+MLibSpotify.egg-info/top_level.txt
