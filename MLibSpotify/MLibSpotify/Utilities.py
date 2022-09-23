@@ -4,13 +4,16 @@ import re
 TrackApiBase = 'https://api.spotify.com/v1/tracks/'
 
 
-def ExtractLinks(message_text):
+def GetSpotifyLinks(message_text):
     # TODO: Update to accept multiple Urls
 
     # Example message:
     # Here's more: https://open.spotify.com/track/0irYSFrgXf2OH1F5NAdK6I?si=0e85a2bb98714998
 
-    return [re.search("(?P<url>https?://[^\s]+)", message_text).group("url")]
+    search_results = re.search("(?P<url>https?://[^\s]+)", message_text)
+    if search_results is not None:
+        return [search_results.group(('url'))]
+    return None
 
 
 def GetUri(spotify_link):

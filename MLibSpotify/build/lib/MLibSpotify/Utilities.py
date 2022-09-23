@@ -1,36 +1,25 @@
-def GETPlaylistUri(playlist_id):
-    return f'https://api.spotify.com/v1/playlists/{playlist_id}'
+import spotipy
+import re
+
+TrackApiBase = 'https://api.spotify.com/v1/tracks/'
 
 
-def GETTrackUri(track_id):
-    return f'https://api.spotify.com/v1/tracks/{track_id}'
+def GetSpotifyLinks(message_text):
+    # TODO: Update to accept multiple Urls
+
+    # Example message:
+    # Here's more: https://open.spotify.com/track/0irYSFrgXf2OH1F5NAdK6I?si=0e85a2bb98714998
+
+    search_results = re.search("(?P<url>https?://[^\s]+)", message_text)
+    if search_results is not None:
+        return [search_results.group(('url'))]
+    return None
 
 
-def POSTTrackUri(playlist_id, track_uri):
-    formatted_uri = track_uri.replace(':', '%3A')
-    return f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={formatted_uri}"
+def GetUri(spotify_link):
+    # Example link:
+    # https://open.spotify.com/track/{track_uri}?si=6da81c5d48394b23
+    uri = spotify_link.split("/track/", 1)[1]
+    uri = uri.split("?", 1)[0]
 
-
-def POSTCreatePlaylist(user_id, playlist_name, playlist_description):
-    body = {'name': playlist_name,
-            'description': playlist_description,
-            'public': True}
-
-    url = f"https://api.spotify.com/v1/users/{user_id}/playlists"
-    return url, body
-
-
-# NOTE: This value must match the redirect
-# URI on the Spotify Developer Dashboard
-RedirectAddress = 'http://localhost:8888'
-
-# def GetAuthToken(scope):
-#     auth_url = 'https://accounts.spotify.com/api/token'
-#     auth_response = requests.post(auth_url, {
-#         'grant_type': 'client_credentials',
-#         'client_id': GlobalSettings.CLIENT_ID,
-#         'client_secret': GlobalSettings.CLIENT_SECRET,
-#         'scope': scope
-#     }).json()
-#
-#     return auth_response['access_token']
+    return f'{TrackApiBase}{uri}'
