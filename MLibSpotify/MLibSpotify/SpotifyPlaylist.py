@@ -1,6 +1,8 @@
 import spotipy
 from spotipy import SpotifyOAuth
 
+from MLibSpotify.tests import GlobalSettings
+
 
 class SpotifyPlaylist:
 
@@ -52,8 +54,8 @@ class AuthorizationValues:
     def __init__(self,
                  client_id,
                  client_secret,
-                 scope='playlist-read-collaborative playlist-modify-public', # default read/write public playlists
-                 redirect_uri='http://localhost:8888'):
+                 scope='playlist-read-collaborative playlist-modify-public',  # default read/write public playlists
+                 redirect_uri=GlobalSettings.RedirectAddress):
         self.Client_id = client_id
         self.Client_secret = client_secret
         self.Redirect_uri = redirect_uri

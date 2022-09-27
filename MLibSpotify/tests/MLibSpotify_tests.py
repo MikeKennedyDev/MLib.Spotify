@@ -73,9 +73,9 @@ def GetUriTest():
 
 # region Run tests
 
-# AuthorizationTest()
-# GetTracksTest()
-# TrackAddTest()
+AuthorizationTest()
+GetTracksTest()
+TrackAddTest()
 GetUrlTest()
 
 message = "Here's more: https://open.spotify.com/track/0irYSFrgXf2OH1F5NAdK6I?si=0e85a2bb98714998"
