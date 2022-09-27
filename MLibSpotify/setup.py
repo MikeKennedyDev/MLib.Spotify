@@ -15,7 +15,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 # This call to setup() does all the work
 setup(
     name="MLibSpotify",
-    version="1.0.5",
+    version="1.0.6",
     description="Library for use in personal spotify account",
     long_description=long_description,
     long_description_content_type="text/markdown",

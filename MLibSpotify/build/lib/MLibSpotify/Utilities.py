@@ -17,9 +17,22 @@ def GetSpotifyLinks(message_text):
 
 
 def GetUri(spotify_link):
+    print(f'Getting uri from link: {spotify_link}')
     # Example link:
     # https://open.spotify.com/track/{track_uri}?si=6da81c5d48394b23
     uri = spotify_link.split("/track/", 1)[1]
     uri = uri.split("?", 1)[0]
+    print(f'track id: {uri}')
 
     return f'{TrackApiBase}{uri}'
+
+
+def GetTrackId(spotify_link):
+    print(f'Getting id from link: {spotify_link}')
+    # Example link:
+    # https://open.spotify.com/track/{track_uri}?si=6da81c5d48394b23
+    Id = spotify_link.split("/track/", 1)[1]
+    Id = Id.split("?", 1)[0]
+    print(f'track id: {Id}')
+
+    return Id
