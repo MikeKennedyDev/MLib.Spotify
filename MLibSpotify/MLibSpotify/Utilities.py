@@ -1,4 +1,3 @@
-import spotipy
 import re
 
 TrackApiBase = 'https://api.spotify.com/v1/tracks/'

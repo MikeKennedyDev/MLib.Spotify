@@ -1,45 +1,73 @@
-import spotipy
-from spotipy import SpotifyOAuth
+import requests
+
+# region Fields
+
+# logger = MLogger.MLogger('MLibSpotify')
+
+__client_id = 'bf7bb8ab99894704bed9dfadf4535ef2'
+__client_secret = '44cb0a59f67b4a3dbfdf0ac7c8f4c57a'
+base_spotify_api = 'https://api.spotify.com/v1/'
+
+
+# endregion
+
+# region Static methods
+def GetPlaylistTracksApi(playlist_id):
+    return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks'
+
+
+# endregion
 
 class SpotifyPlaylist:
+    # region Fields
+
+    PlaylistId = None
+    __redirect_uri = 'http://localhost:8888/callback'
+    __scope = 'playlist-read-collaborative playlist-modify-public'
+    __auth_token = None
+    __all_tracks = []
+
+    # endregion
 
     # region Constructors
 
-    def __init__(self, authorization_values, playlist_id):
-        print(f'Modelling playlist with id: {playlist_id}')
-
-        auth_man = SpotifyOAuth(
-            client_id=authorization_values.Client_id,
-            client_secret=authorization_values.Client_secret,
-            redirect_uri=authorization_values.Redirect_uri,
-            scope=authorization_values.Scope)
-
-        if 'playlist-read-collaborative' not in auth_man.scope:
-            print("you shouldn't be here")
-            return
-            # TODO: throw error on bad scope
+    def __init__(self, auth_token, playlist_id, scope=None, redirect_uri=None):
 
         self.PlaylistId = playlist_id
 
-        self.__auth_manager = auth_man
-        self.__spotify = spotipy.Spotify(auth_manager=auth_man)
-        self.__allTracks = self.GetAllTracks(force_refresh=True)
+        if redirect_uri is not None:
+            self.__redirect_uri = redirect_uri
+
+        if auth_token is not None:
+            self.__auth_token = auth_token
+
+        if scope is not None:
+            self.__scope = scope
 
     # endregion
 
     # region Methods
 
     def GetAllTracks(self, force_refresh=False):
-        if not force_refresh:
+
+        if not force_refresh and self.__allTracks:
             return self.__allTracks
-        self.__allTracks = [item['track'] for item in
-                            self.__spotify.playlist_items(playlist_id=self.PlaylistId)['items']]
-        return self.__allTracks
+
+        print(f'Populating tracks for playlist {self.PlaylistId}')
+
+        endpoint = GetPlaylistTracksApi(self.PlaylistId)
+        headers = {"Authorization": f"Bearer {self.__auth_token}"}
+        print(f'Targeting endpoint: {endpoint}')
+        print(f'Using auth values: {headers}')
+        response = requests.get(endpoint, headers=headers)
+
+        print(response)
+
+        return None
 
     def AddTracks(self, tracks):
-        print(f'Adding {len(tracks)} track(s):')
-        for track in tracks:
-            print(f'- {track}')
+        print(f'Adding {len(tracks)} track(s) to playlist {self.PlaylistId}')
+        # logger.Info(f" Adding {len(tracks)} track(s) to playlist '{self.PlaylistId}'")
         self.__spotify.playlist_add_items(playlist_id=self.PlaylistId, items=tracks)
         self.__allTracks = self.GetAllTracks(force_refresh=True)
 
@@ -48,12 +76,5 @@ class SpotifyPlaylist:
 
 class AuthorizationValues:
 
-    def __init__(self,
-                 client_id,
-                 client_secret,
-                 scope='playlist-read-collaborative playlist-modify-public',  # default read/write public playlists
-                 redirect_uri='http://localhost:8888'): #TODO: Move to env
-        self.Client_id = client_id
-        self.Client_secret = client_secret
-        self.Redirect_uri = redirect_uri
-        self.Scope = scope
+    def __init__(self, auth_token):
+        self.authorization_token = auth_token
