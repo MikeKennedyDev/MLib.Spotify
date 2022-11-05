@@ -1,3 +1,5 @@
+import os
+
 import requests
 
 # region Fields
@@ -12,8 +14,14 @@ base_spotify_api = 'https://api.spotify.com/v1/'
 # endregion
 
 # region Static methods
-def GetPlaylistTracksApi(playlist_id):
+def GetPlaylistEndpoint(playlist_id):
     return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks'
+
+
+def GetAddTracksEndpoint(playlist_id, tracks):
+    endpoint = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris='
+    uris = '%2C'.join([f'spotify%3Atrack%3A{track}' for track in tracks])
+    return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={uris}'
 
 
 # endregion
@@ -22,27 +30,16 @@ class SpotifyPlaylist:
     # region Fields
 
     PlaylistId = None
-    __redirect_uri = 'http://localhost:8888/callback'
-    __scope = 'playlist-read-collaborative playlist-modify-public'
-    __auth_token = None
     __all_tracks = []
 
     # endregion
 
     # region Constructors
 
-    def __init__(self, auth_token, playlist_id, scope=None, redirect_uri=None):
-
+    def __init__(self, playlist_id):
         self.PlaylistId = playlist_id
-
-        if redirect_uri is not None:
-            self.__redirect_uri = redirect_uri
-
-        if auth_token is not None:
-            self.__auth_token = auth_token
-
-        if scope is not None:
-            self.__scope = scope
+        self.__allTracks = self.GetAllTracks(force_refresh=True)
+        print(f'Playlist object created for playlist {playlist_id} and populated with {len(self.__allTracks)} tracks.')
 
     # endregion
 
@@ -53,28 +50,28 @@ class SpotifyPlaylist:
         if not force_refresh and self.__allTracks:
             return self.__allTracks
 
-        print(f'Populating tracks for playlist {self.PlaylistId}')
-
-        endpoint = GetPlaylistTracksApi(self.PlaylistId)
-        headers = {"Authorization": f"Bearer {self.__auth_token}"}
-        print(f'Targeting endpoint: {endpoint}')
-        print(f'Using auth values: {headers}')
+        endpoint = GetPlaylistEndpoint(self.PlaylistId)
+        headers = {"Authorization": f"Bearer {os.getenv('ACCESS_TOKEN')}"}
         response = requests.get(endpoint, headers=headers)
 
-        print(response)
+        if not response.ok:
+            raise Exception('Error returned from Spotify API call')
 
-        return None
+        return [item['track'] for item in response.json()['items']]
 
-    def AddTracks(self, tracks):
-        print(f'Adding {len(tracks)} track(s) to playlist {self.PlaylistId}')
+    def AddTracks(self, track_ids):
+        print(f'Adding {len(track_ids)} track(s) to playlist {self.PlaylistId}')
+
         # logger.Info(f" Adding {len(tracks)} track(s) to playlist '{self.PlaylistId}'")
-        self.__spotify.playlist_add_items(playlist_id=self.PlaylistId, items=tracks)
+
+        endpoint = GetAddTracksEndpoint(self.PlaylistId, tracks=track_ids)
+        headers = {"Authorization": f"Bearer {os.getenv('ACCESS_TOKEN')}"}
+
+        response = requests.post(endpoint, headers=headers)
+        if not response.ok:
+            raise Exception(f'Error returned from Spotify Post API: {response.json()["error"]}')
+
+        # Show new tracks in __allTracks
         self.__allTracks = self.GetAllTracks(force_refresh=True)
 
     # endregion
-
-
-class AuthorizationValues:
-
-    def __init__(self, auth_token):
-        self.authorization_token = auth_token

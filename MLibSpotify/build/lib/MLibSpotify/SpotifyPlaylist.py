@@ -1,68 +1,77 @@
-import spotipy
-from spotipy import SpotifyOAuth
-# from MLibLogging import MLogger
+import os
+
+import requests
 
 # region Fields
 
 # logger = MLogger.MLogger('MLibSpotify')
 
+__client_id = 'bf7bb8ab99894704bed9dfadf4535ef2'
+__client_secret = '44cb0a59f67b4a3dbfdf0ac7c8f4c57a'
+base_spotify_api = 'https://api.spotify.com/v1/'
+
+
+# endregion
+
+# region Static methods
+def GetPlaylistEndpoint(playlist_id):
+    return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks'
+
+
+def GetAddTracksEndpoint(playlist_id, tracks):
+    endpoint = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris='
+    uris = '%2C'.join([f'spotify%3Atrack%3A{track}' for track in tracks])
+    return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={uris}'
+
 
 # endregion
 
 class SpotifyPlaylist:
+    # region Fields
+
+    PlaylistId = None
+    __all_tracks = []
+
+    # endregion
 
     # region Constructors
 
-    def __init__(self, authorization_values, playlist_id):
-        print(f'Modelling playlist with id: {playlist_id}')
-        # logger.Info(f'Modelling playlist with id: {playlist_id}')
-
-        auth_man = SpotifyOAuth(
-            client_id=authorization_values.Client_id,
-            client_secret=authorization_values.Client_secret,
-            redirect_uri=authorization_values.Redirect_uri,
-            scope=authorization_values.Scope)
-
-        if 'playlist-read-collaborative' not in auth_man.scope:
-            # logger.Error("Scope: 'playlist-read-collaborative' is necessary to use MLibSpotify.")
-            raise PermissionError("Scope: 'playlist-read-collaborative' is necessary to use MLibSpotify.")
-
+    def __init__(self, playlist_id):
         self.PlaylistId = playlist_id
-
-        self.__auth_manager = auth_man
-        self.__spotify = spotipy.Spotify(auth_manager=auth_man)
         self.__allTracks = self.GetAllTracks(force_refresh=True)
+        print(f'Playlist object created for playlist {playlist_id} and populated with {len(self.__allTracks)} tracks.')
 
     # endregion
 
     # region Methods
 
     def GetAllTracks(self, force_refresh=False):
-        if not force_refresh:
-            return self.__allTracks
-        print(f'Populating tracks for playlist {self.PlaylistId}')
-        # logger.Debug(f'Populating tracks for playlist {self.PlaylistId}')
-        self.__allTracks = [item['track'] for item in
-                            self.__spotify.playlist_items(playlist_id=self.PlaylistId)['items']]
-        return self.__allTracks
 
-    def AddTracks(self, tracks):
-        print(f'Adding {len(tracks)} track(s) to playlist {self.PlaylistId}')
+        if not force_refresh and self.__allTracks:
+            return self.__allTracks
+
+        endpoint = GetPlaylistEndpoint(self.PlaylistId)
+        headers = {"Authorization": f"Bearer {os.getenv('ACCESS_TOKEN')}"}
+        response = requests.get(endpoint, headers=headers)
+
+        if not response.ok:
+            raise Exception('Error returned from Spotify API call')
+
+        return [item['track'] for item in response.json()['items']]
+
+    def AddTracks(self, track_ids):
+        print(f'Adding {len(track_ids)} track(s) to playlist {self.PlaylistId}')
+
         # logger.Info(f" Adding {len(tracks)} track(s) to playlist '{self.PlaylistId}'")
-        self.__spotify.playlist_add_items(playlist_id=self.PlaylistId, items=tracks)
+
+        endpoint = GetAddTracksEndpoint(self.PlaylistId, tracks=track_ids)
+        headers = {"Authorization": f"Bearer {os.getenv('ACCESS_TOKEN')}"}
+
+        response = requests.post(endpoint, headers=headers)
+        if not response.ok:
+            raise Exception(f'Error returned from Spotify Post API: {response.json()["error"]}')
+
+        # Show new tracks in __allTracks
         self.__allTracks = self.GetAllTracks(force_refresh=True)
 
     # endregion
-
-
-class AuthorizationValues:
-
-    def __init__(self,
-                 client_id,
-                 client_secret,
-                 scope='playlist-read-collaborative playlist-modify-public',  # default read/write public playlists
-                 redirect_uri='http://localhost:8888'):
-        self.Client_id = client_id
-        self.Client_secret = client_secret
-        self.Redirect_uri = redirect_uri
-        self.Scope = scope

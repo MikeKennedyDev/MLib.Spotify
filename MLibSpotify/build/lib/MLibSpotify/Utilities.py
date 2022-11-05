@@ -1,4 +1,10 @@
+import base64
+import os
 import re
+import webbrowser
+from urllib.parse import urlencode
+
+import requests
 
 TrackApiBase = 'https://api.spotify.com/v1/tracks/'
 
@@ -35,3 +41,70 @@ def GetTrackId(spotify_link):
     print(f'track id: {Id}')
 
     return Id
+
+
+def EncodeAuthorization():
+    encoded_id = os.getenv("CLIENT_ID").encode()
+    encoded_secret = os.getenv("CLIENT_SECRET").encode()
+
+    encoded_creds = base64.b64encode(encoded_id + b':' + encoded_secret).decode("utf-8")
+
+    return f'Basic {encoded_creds}'
+
+
+def GetAccessToken(RefreshToken=None):
+    request_headers = {
+        "Authorization": EncodeAuthorization(),
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    request_body = {
+        "grant_type": "authorization_code",
+        "code": os.getenv("AUTHORIZATION_CODE"),
+        "redirect_uri": os.getenv("REDIRECT_URI")
+    }
+
+    response = requests.post("https://accounts.spotify.com/api/token",
+                             headers=request_headers,
+                             data=request_body)
+    print(response)
+    print(response.content)
+    return response.json()['access_token']
+
+
+def RefreshAccessToken():
+    request_headers = {
+        "Authorization": EncodeAuthorization(),
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    request_body = {
+        "grant_type": "refresh_token",
+        "refresh_token": os.getenv("REFRESH_TOKEN")
+    }
+
+    response = requests.post("https://accounts.spotify.com/api/token",
+                             headers=request_headers,
+                             data=request_body)
+    print(response)
+    print(response.content)
+    return response.json()['access_token']
+
+
+def GetAuthorizationCode():
+    # Send get request to /authorize
+    client_id = os.getenv("CLIENT_ID")
+    redirect_uri = os.getenv("REDIRECT_URI")
+    scope = 'playlist-read-collaborative playlist-modify-public'
+
+    auth_url = 'https://accounts.spotify.com/authorize?'
+    headers = {"client_id": client_id,
+               "response_type": "code",
+               "redirect_uri": redirect_uri,
+               "scope": scope
+               }
+
+    # Code is returned in web browser here
+    webbrowser.open(auth_url + urlencode(headers))
+
+    return

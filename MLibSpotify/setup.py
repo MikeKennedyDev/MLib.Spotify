@@ -15,7 +15,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 # This call to setup() does all the work
 setup(
     name="MLibSpotify",
-    version="1.0.9.2",
+    version="2.0.0",
     description="Library for use in personal spotify account",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -34,5 +34,4 @@ setup(
     ],
     packages=["MLibSpotify"],
     include_package_data=True,
-    install_requires=["spotipy"]
 )
