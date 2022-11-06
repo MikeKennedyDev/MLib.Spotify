@@ -31,15 +31,20 @@ class SpotifyPlaylist:
 
     PlaylistId = None
     __all_tracks = []
+    __access_token = None
 
     # endregion
 
     # region Constructors
 
-    def __init__(self, playlist_id):
+    def __init__(self,
+                 playlist_id,
+                 access_token):
+
         self.PlaylistId = playlist_id
-        self.__allTracks = self.GetAllTracks(force_refresh=True)
-        print(f'Playlist object created for playlist {playlist_id} and populated with {len(self.__allTracks)} tracks.')
+        self.__access_token = access_token
+        self.__all_tracks = self.GetAllTracks(force_refresh=True)
+        print(f'Playlist object created for playlist {playlist_id} and populated with {len(self.__all_tracks)} tracks.')
 
     # endregion
 
@@ -47,15 +52,15 @@ class SpotifyPlaylist:
 
     def GetAllTracks(self, force_refresh=False):
 
-        if not force_refresh and self.__allTracks:
-            return self.__allTracks
+        if not force_refresh and self.__all_tracks:
+            return self.__all_tracks
 
         endpoint = GetPlaylistEndpoint(self.PlaylistId)
-        headers = {"Authorization": f"Bearer {os.getenv('ACCESS_TOKEN')}"}
+        headers = {"Authorization": f"Bearer {self.__access_token}"}
         response = requests.get(endpoint, headers=headers)
 
         if not response.ok:
-            raise Exception('Error returned from Spotify API call')
+            raise Exception(f'Error returned from Spotify API call: {response.json()["error"]}')
 
         return [item['track'] for item in response.json()['items']]
 
@@ -65,13 +70,13 @@ class SpotifyPlaylist:
         # logger.Info(f" Adding {len(tracks)} track(s) to playlist '{self.PlaylistId}'")
 
         endpoint = GetAddTracksEndpoint(self.PlaylistId, tracks=track_ids)
-        headers = {"Authorization": f"Bearer {os.getenv('ACCESS_TOKEN')}"}
+        headers = {"Authorization": f"Bearer {self.__access_token}"}
 
         response = requests.post(endpoint, headers=headers)
         if not response.ok:
             raise Exception(f'Error returned from Spotify Post API: {response.json()["error"]}')
 
-        # Show new tracks in __allTracks
-        self.__allTracks = self.GetAllTracks(force_refresh=True)
+        # Update internal track list
+        self.__all_tracks = self.GetAllTracks(force_refresh=True)
 
     # endregion

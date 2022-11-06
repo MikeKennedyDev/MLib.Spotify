@@ -25,7 +25,8 @@ TestTrackUri = 'https://api.spotify.com/v1/tracks/0irYSFrgXf2OH1F5NAdK6I'
 def AuthorizationTest():
     global TestPlaylist
 
-    TestPlaylist = SpotifyPlaylist(playlist_id=TestPlaylistId)
+    TestPlaylist = SpotifyPlaylist(playlist_id=TestPlaylistId,
+                                   access_token=os.getenv("ACCESS_TOKEN"))
 
     assert TestPlaylist is not None
     # __logger.Debug('AuthorizationTest success')
@@ -81,6 +82,10 @@ GetUrlTest()
 
 # endregion
 
+# region Refresh access token
+
 # Util.GetAuthorizationCode()
 # Util.GetAccessToken()
 # Util.RefreshAccessToken()
+
+# endregion
