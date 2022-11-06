@@ -1,6 +1,5 @@
 import requests
-
-from MLibSpotify import MLibSpotify
+from MLibSpotify import Utilities
 
 # region Fields
 
@@ -11,17 +10,6 @@ base_spotify_api = 'https://api.spotify.com/v1/'
 
 # endregion
 
-# region Static methods
-def GetPlaylistEndpoint(playlist_id):
-    return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks'
-
-
-def GetAddTracksEndpoint(playlist_id, tracks):
-    uris = '%2C'.join([f'spotify%3Atrack%3A{track}' for track in tracks])
-    return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={uris}'
-
-
-# endregion
 
 class SpotifyPlaylist:
     # region Fields
@@ -30,6 +18,8 @@ class SpotifyPlaylist:
     __all_tracks = []
     __refresh_token = None
     __access_token = None
+    __client_id = None
+    __client_secret = None
 
     # endregion
 
@@ -37,12 +27,20 @@ class SpotifyPlaylist:
 
     def __init__(self,
                  playlist_id,
+                 client_id,
+                 client_secret,
                  refresh_token):
 
+        # Initialize playlist values
         self.PlaylistId = playlist_id
         self.__refresh_token = refresh_token
+        self.__client_id = client_id
+        self.__client_secret = client_secret
+
+        # Populate playlist tracks
         self.__refresh_access_token()
         self.__all_tracks = self.GetAllTracks(force_refresh=True)
+
         print(f'Playlist object created for playlist {playlist_id} and populated with {len(self.__all_tracks)} tracks.')
 
     # endregion
@@ -54,7 +52,7 @@ class SpotifyPlaylist:
         if not force_refresh and self.__all_tracks:
             return self.__all_tracks
 
-        endpoint = GetPlaylistEndpoint(self.PlaylistId)
+        endpoint = Utilities.GetPlaylistEndpoint(self.PlaylistId)
         headers = {"Authorization": f"Bearer {self.__access_token}"}
         response = requests.get(endpoint, headers=headers)
 
@@ -77,7 +75,7 @@ class SpotifyPlaylist:
     def AddTracks(self, track_ids):
         print(f'Adding {len(track_ids)} track(s) to playlist {self.PlaylistId}')
 
-        endpoint = GetAddTracksEndpoint(self.PlaylistId, tracks=track_ids)
+        endpoint = Utilities.GetAddTracksEndpoint(self.PlaylistId, tracks=track_ids)
         headers = {"Authorization": f"Bearer {self.__access_token}"}
 
         response = requests.post(endpoint, headers=headers)
@@ -90,7 +88,8 @@ class SpotifyPlaylist:
     def __refresh_access_token(self):
 
         request_headers = {
-            "Authorization": MLibSpotify.Utilities.EncodeAuthorization(),
+            "Authorization": Utilities.EncodeAuthorization(self.__client_id,
+                                                           self.__client_secret),
             "Content-Type": "application/x-www-form-urlencoded"
         }
 

@@ -9,6 +9,15 @@ import requests
 TrackApiBase = 'https://api.spotify.com/v1/tracks/'
 
 
+def GetPlaylistEndpoint(playlist_id):
+    return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks'
+
+
+def GetAddTracksEndpoint(playlist_id, tracks):
+    uris = '%2C'.join([f'spotify%3Atrack%3A{track}' for track in tracks])
+    return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={uris}'
+
+
 def GetSpotifyLinks(message_text):
     # TODO: Update to accept multiple Urls
 
@@ -43,9 +52,9 @@ def GetTrackId(spotify_link):
     return Id
 
 
-def EncodeAuthorization():
-    encoded_id = os.getenv("CLIENT_ID").encode()
-    encoded_secret = os.getenv("CLIENT_SECRET").encode()
+def EncodeAuthorization(client_id, client_secret):
+    encoded_id = client_id.encode()
+    encoded_secret = client_secret.encode()
 
     encoded_creds = base64.b64encode(encoded_id + b':' + encoded_secret).decode("utf-8")
 

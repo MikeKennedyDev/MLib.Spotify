@@ -26,6 +26,8 @@ def AuthorizationTest():
     global TestPlaylist
 
     TestPlaylist = SpotifyPlaylist(playlist_id=TestPlaylistId,
+                                   client_id=os.getenv("CLIENT_ID"),
+                                   client_secret=os.getenv("CLIENT_SECRET"),
                                    refresh_token=os.getenv("REFRESH_TOKEN"))
 
     assert TestPlaylist is not None
