@@ -58,17 +58,7 @@ class SpotifyPlaylist:
 
         # Error handling
         if not response.ok:
-            error_message = response.json()['error']['message']
-
-            # Refresh access token if expired
-            if 'access token expired' in error_message \
-                    or 'Invalid access token' in error_message:
-                self.__refresh_access_token()
-                self.GetAllTracks(force_refresh=force_refresh)
-                return
-
-            # Throw exception otherwise
-            raise Exception(f'Error returned from Spotify API call: {error_message}')
+            self.__handle_error(response)
 
         return [item['track'] for item in response.json()['items']]
 
@@ -80,10 +70,24 @@ class SpotifyPlaylist:
 
         response = requests.post(endpoint, headers=headers)
         if not response.ok:
-            raise Exception(f'Error returned from Spotify Post API: {response.json()["error"]}')
+            self.__handle_error()
 
         # Update internal track list
         self.__all_tracks = self.GetAllTracks(force_refresh=True)
+
+    def __handle_error(self, response):
+        error_message = response.json()['error']['message']
+
+        # Refresh access token if expired
+        if 'access token expired' in error_message \
+                or 'Invalid access token' in error_message:
+            self.__refresh_access_token()
+            self.GetAllTracks(force_refresh=True)
+            return
+
+        # Throw exception otherwise
+        raise Exception(f'Error returned from Spotify API call: {error_message}')
+        return
 
     def __refresh_access_token(self):
         print('Refreshing access_token')

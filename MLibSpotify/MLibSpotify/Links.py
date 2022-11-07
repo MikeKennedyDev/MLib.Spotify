@@ -9,7 +9,7 @@ def GetSpotifyLinks(message_text):
 
     search_results = re.search("(?P<url>https?://[^\s]+)", message_text)
     if search_results is not None:
-        return [search_results.group(('url'))]
+        return [search_results.group('url')]
     return None
 
 
@@ -17,10 +17,9 @@ def GetTrackId(spotify_link):
     # Example link:
     # https://open.spotify.com/track/{track_id}?si=6da81c5d48394b23
 
-    print(f'Getting id from link: {spotify_link}')
+    print(f'Getting track id from link: {spotify_link}')
     Id = spotify_link.split("/track/", 1)[1]
     Id = Id.split("?", 1)[0]
-    print(f'track id: {Id}')
 
     return Id
 
@@ -29,9 +28,8 @@ def GetPlaylistId(playlist_link):
     # Example url:
     # https://open.spotify.com/playlist/{playlist_id}?si=61478f711eaa48ab
 
-    print(f'Getting id from link: {playlist_link}')
+    print(f'Getting playlist id from link: {playlist_link}')
     Id = playlist_link.split("/playlist/", 1)[1]
     Id = Id.split("?", 1)[0]
-    print(f'playlist id: {Id}')
 
     return Id
