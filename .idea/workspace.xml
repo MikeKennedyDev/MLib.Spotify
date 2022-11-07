@@ -6,8 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="c89a95c4-606d-4e2c-b859-1ba76b52cab5" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MLibSpotify/MLibSpotify.egg-info/PKG-INFO" beforeDir="false" afterPath="$PROJECT_DIR$/MLibSpotify/MLibSpotify.egg-info/PKG-INFO" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MLibSpotify/MLibSpotify/SpotifyPlaylist.py" beforeDir="false" afterPath="$PROJECT_DIR$/MLibSpotify/MLibSpotify/SpotifyPlaylist.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MLibSpotify/MLibSpotify/Utilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/MLibSpotify/MLibSpotify/Utilities.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MLibSpotify/build/lib/MLibSpotify/SpotifyPlaylist.py" beforeDir="false" afterPath="$PROJECT_DIR$/MLibSpotify/build/lib/MLibSpotify/SpotifyPlaylist.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MLibSpotify/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/MLibSpotify/setup.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MLibSpotify/tests/MLibSpotify_tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/MLibSpotify/tests/MLibSpotify_tests.py" afterDir="false" />
     </list>
@@ -37,16 +39,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Programming/Libraries/Python/MLibSpotify&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "last_opened_file_path": "C:/Programming/Libraries/Python/MLibSpotify"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Programming\Libraries\Python\MLibSpotify\MLibSpotify\tests" />
       <recent name="C:\Programming\Libraries\Python\MLibSpotify\MLibSpotify" />
       <recent name="C:\Programming\Libraries\Python\MLibSpotify\venv\MLibSpotify" />
     </key>

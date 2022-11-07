@@ -86,6 +86,7 @@ class SpotifyPlaylist:
         self.__all_tracks = self.GetAllTracks(force_refresh=True)
 
     def __refresh_access_token(self):
+        print('Refreshing access_token')
 
         request_headers = {
             "Authorization": Utilities.EncodeAuthorization(self.__client_id,

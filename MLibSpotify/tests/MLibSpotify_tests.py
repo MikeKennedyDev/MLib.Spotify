@@ -2,7 +2,8 @@ import os
 # from MLibLogging import MLogger
 from dotenv import load_dotenv
 
-import MLibSpotify.MLibSpotify.Utilities as Util
+# from MLibSpotify.MLibSpotify.SpotifyPlaylist import SpotifyPlaylist
+import Utilities as Util
 from MLibSpotify.MLibSpotify.SpotifyPlaylist import SpotifyPlaylist
 
 load_dotenv()

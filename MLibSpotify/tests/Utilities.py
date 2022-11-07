@@ -18,6 +18,40 @@ def GetAddTracksEndpoint(playlist_id, tracks):
     return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={uris}'
 
 
+def GetSpotifyLinks(message_text):
+    # TODO: Update to accept multiple Urls
+
+    # Example message:
+    # Here's more: https://open.spotify.com/track/0irYSFrgXf2OH1F5NAdK6I?si=0e85a2bb98714998
+
+    search_results = re.search("(?P<url>https?://[^\s]+)", message_text)
+    if search_results is not None:
+        return [search_results.group(('url'))]
+    return None
+
+
+def GetUri(spotify_link):
+    print(f'Getting uri from link: {spotify_link}')
+    # Example link:
+    # https://open.spotify.com/track/{track_uri}?si=6da81c5d48394b23
+    uri = spotify_link.split("/track/", 1)[1]
+    uri = uri.split("?", 1)[0]
+    print(f'track id: {uri}')
+
+    return f'{TrackApiBase}{uri}'
+
+
+def GetTrackId(spotify_link):
+    print(f'Getting id from link: {spotify_link}')
+    # Example link:
+    # https://open.spotify.com/track/{track_uri}?si=6da81c5d48394b23
+    Id = spotify_link.split("/track/", 1)[1]
+    Id = Id.split("?", 1)[0]
+    print(f'track id: {Id}')
+
+    return Id
+
+
 def EncodeAuthorization(client_id, client_secret):
     encoded_id = client_id.encode()
     encoded_secret = client_secret.encode()
@@ -29,7 +63,8 @@ def EncodeAuthorization(client_id, client_secret):
 
 def GetAccessToken(RefreshToken=None):
     request_headers = {
-        "Authorization": EncodeAuthorization(),
+        "Authorization": EncodeAuthorization(client_id=os.getenv("CLIENT_ID"),
+                                             client_secret=os.getenv("CLIENT_SECRET")),
         "Content-Type": "application/x-www-form-urlencoded"
     }
 
