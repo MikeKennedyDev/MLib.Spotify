@@ -32,7 +32,6 @@ def AuthorizationTest():
                                    refresh_token=os.getenv("REFRESH_TOKEN"))
 
     assert TestPlaylist is not None
-    # __logger.Debug('AuthorizationTest success')
     print('AuthorizationTest success')
 
 

@@ -1,11 +1,18 @@
 import re
 
 
+def GetSpotifyPlaylistUrl(playlist_id):
+    return f"https://open.spotify.com/playlist/{playlist_id}"
+
+
 def GetSpotifyLinks(message_text):
     # TODO: Update to accept multiple Urls
 
     # Example message:
     # Here's more: https://open.spotify.com/track/0irYSFrgXf2OH1F5NAdK6I?si=0e85a2bb98714998
+
+    if 'track' not in message_text:
+        return None
 
     search_results = re.search("(?P<url>https?://[^\s]+)", message_text)
     if search_results is not None:

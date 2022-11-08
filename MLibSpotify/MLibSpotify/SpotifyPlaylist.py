@@ -1,10 +1,9 @@
 import requests
-from MLibSpotify import Utilities
+
+from MLibSpotify import Utilities, Links
 
 # region Fields
 
-__client_id = 'bf7bb8ab99894704bed9dfadf4535ef2'
-__client_secret = '44cb0a59f67b4a3dbfdf0ac7c8f4c57a'
 base_spotify_api = 'https://api.spotify.com/v1/'
 
 
@@ -15,6 +14,7 @@ class SpotifyPlaylist:
     # region Fields
 
     PlaylistId = None
+    PlaylistName = None
     __all_tracks = []
     __refresh_token = None
     __access_token = None
@@ -37,7 +37,9 @@ class SpotifyPlaylist:
         self.__client_id = client_id
         self.__client_secret = client_secret
 
-        # Populate playlist tracks
+        # Populate playlist data
+        self.PlaylistName = self.GetPlaylistName()
+        self.PlaylistUrl = Links.GetSpotifyPlaylistUrl(self.PlaylistId)
         self.__refresh_access_token()
         self.__all_tracks = self.GetAllTracks(force_refresh=True)
 
@@ -47,18 +49,31 @@ class SpotifyPlaylist:
 
     # region Methods
 
+    def GetPlaylistName(self):
+        endpoint = Utilities.GetPlaylistEndpoint(self.PlaylistId)
+        headers = {"Authorization": f"Bearer {self.__access_token}"}
+        response = requests.get(endpoint, headers=headers)
+
+        if not response.ok:
+            self.__handle_error(response)
+            return self.GetPlaylistName()
+
+        return response.json()["name"]
+
     def GetAllTracks(self, force_refresh=False):
 
         if not force_refresh and self.__all_tracks:
             return self.__all_tracks
 
-        endpoint = Utilities.GetPlaylistEndpoint(self.PlaylistId)
+        endpoint = Utilities.GetPlaylistTracksEndpoint(self.PlaylistId)
         headers = {"Authorization": f"Bearer {self.__access_token}"}
         response = requests.get(endpoint, headers=headers)
 
         # Error handling
         if not response.ok:
             self.__handle_error(response)
+            self.GetAllTracks(force_refresh=True)
+            return
 
         return [item['track'] for item in response.json()['items']]
 
@@ -71,6 +86,8 @@ class SpotifyPlaylist:
         response = requests.post(endpoint, headers=headers)
         if not response.ok:
             self.__handle_error(response)
+            self.AddTracks(track_ids=track_ids)
+            return
 
         # Update internal track list
         self.__all_tracks = self.GetAllTracks(force_refresh=True)
@@ -82,7 +99,6 @@ class SpotifyPlaylist:
         if 'access token expired' in error_message \
                 or 'Invalid access token' in error_message:
             self.__refresh_access_token()
-            self.GetAllTracks(force_refresh=True)
             return
 
         # Throw exception otherwise

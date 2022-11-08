@@ -9,8 +9,12 @@ import requests
 TrackApiBase = 'https://api.spotify.com/v1/tracks/'
 
 
-def GetPlaylistEndpoint(playlist_id):
+def GetPlaylistTracksEndpoint(playlist_id):
     return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks'
+
+
+def GetPlaylistEndpoint(playlist_id):
+    return f'https://api.spotify.com/v1/playlists/{playlist_id}'
 
 
 def GetAddTracksEndpoint(playlist_id, tracks):
