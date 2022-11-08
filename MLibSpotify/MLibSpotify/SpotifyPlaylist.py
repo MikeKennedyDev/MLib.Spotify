@@ -70,7 +70,7 @@ class SpotifyPlaylist:
 
         response = requests.post(endpoint, headers=headers)
         if not response.ok:
-            self.__handle_error()
+            self.__handle_error(response)
 
         # Update internal track list
         self.__all_tracks = self.GetAllTracks(force_refresh=True)
