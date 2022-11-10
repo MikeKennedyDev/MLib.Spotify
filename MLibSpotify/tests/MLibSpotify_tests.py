@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 # from MLibSpotify.MLibSpotify.SpotifyPlaylist import SpotifyPlaylist
 import Utilities as Util
-from MLibSpotify.MLibSpotify.SpotifyPlaylist import SpotifyPlaylist
+from MLibSpotify.SpotifyPlaylist import SpotifyPlaylist
 
 load_dotenv()
 

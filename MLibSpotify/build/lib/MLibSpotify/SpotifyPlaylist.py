@@ -75,12 +75,20 @@ class SpotifyPlaylist:
             self.GetAllTracks(force_refresh=True)
             return
 
-        return [item['track'] for item in response.json()['items']]
+        self.__all_tracks = [item['track'] for item in response.json()['items']]
+        return self.__all_tracks
 
     def AddTracks(self, track_ids):
-        print(f'Adding {len(track_ids)} track(s) to playlist {self.PlaylistId}')
 
-        endpoint = Utilities.GetAddTracksEndpoint(self.PlaylistId, tracks=track_ids)
+        playlist_track_ids = [track['id'] for track in self.__all_tracks]
+        tracks_to_add = list(set(track_ids) - set(playlist_track_ids))
+        print(tracks_to_add)
+        if len(tracks_to_add) == 0:
+            raise Exception('Specified tracks already in playlist.')
+
+        print(f'Adding {len(tracks_to_add)} track(s) to playlist {self.PlaylistId}')
+
+        endpoint = Utilities.GetAddTracksEndpoint(self.PlaylistId, tracks=tracks_to_add)
         headers = {"Authorization": f"Bearer {self.__access_token}"}
 
         response = requests.post(endpoint, headers=headers)
@@ -103,10 +111,8 @@ class SpotifyPlaylist:
 
         # Throw exception otherwise
         raise Exception(f'Error returned from Spotify API call: {error_message}')
-        return
 
     def __refresh_access_token(self):
-        print('Refreshing access_token')
 
         request_headers = {
             "Authorization": Utilities.EncodeAuthorization(self.__client_id,

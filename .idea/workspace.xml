@@ -7,11 +7,7 @@
     <list default="true" id="c89a95c4-606d-4e2c-b859-1ba76b52cab5" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MLibSpotify/MLibSpotify.egg-info/PKG-INFO" beforeDir="false" afterPath="$PROJECT_DIR$/MLibSpotify/MLibSpotify.egg-info/PKG-INFO" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MLibSpotify/MLibSpotify.egg-info/SOURCES.txt" beforeDir="false" afterPath="$PROJECT_DIR$/MLibSpotify/MLibSpotify.egg-info/SOURCES.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MLibSpotify/MLibSpotify/Links.py" beforeDir="false" afterPath="$PROJECT_DIR$/MLibSpotify/MLibSpotify/Links.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MLibSpotify/MLibSpotify/SpotifyPlaylist.py" beforeDir="false" afterPath="$PROJECT_DIR$/MLibSpotify/MLibSpotify/SpotifyPlaylist.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MLibSpotify/build/lib/MLibSpotify/Utilities.py" beforeDir="false" afterPath="$PROJECT_DIR$/MLibSpotify/build/lib/MLibSpotify/Utilities.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MLibSpotify/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/MLibSpotify/setup.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
