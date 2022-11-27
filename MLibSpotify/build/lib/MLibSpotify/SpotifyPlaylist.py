@@ -80,22 +80,61 @@ class SpotifyPlaylist:
 
     def AddTracks(self, track_ids):
 
+        # Refresh tracks before add
+        self.__all_tracks = self.GetAllTracks(force_refresh=True)
+
         playlist_track_ids = [track['id'] for track in self.__all_tracks]
         tracks_to_add = list(set(track_ids) - set(playlist_track_ids))
-        print(tracks_to_add)
+
         if len(tracks_to_add) == 0:
             raise Exception('Specified tracks already in playlist.')
 
         print(f'Adding {len(tracks_to_add)} track(s) to playlist {self.PlaylistId}')
 
-        endpoint = Utilities.GetAddTracksEndpoint(self.PlaylistId, tracks=tracks_to_add)
+        headers = {"Authorization": f"Bearer {self.__access_token}"}
+        playlist_chunks = Utilities.chunker(tracks_to_add, 10)
+
+        for chunk in playlist_chunks:
+            endpoint = Utilities.GetAddTracksEndpoint(self.PlaylistId, tracks=chunk)
+            response = requests.post(endpoint, headers=headers)
+            if not response.ok:
+                self.__handle_error(response)
+                self.AddTracks(track_ids=track_ids)
+                return
+
+
+
+
+        # Update internal track list
+        self.__all_tracks = self.GetAllTracks(force_refresh=True)
+
+    def RemoveTracks(self, track_ids):
+
+        # Refresh tracks
+        self.__all_tracks = self.GetAllTracks(force_refresh=True)
+
+        playlist_track_ids = [track['id'] for track in self.__all_tracks]
+        tracks_to_remove = [value for value in track_ids if value in playlist_track_ids]
+        if len(tracks_to_remove) == 0:
+            raise Exception('Tracks not found in playlist.')
+
+        print(f'Removing {len(tracks_to_remove)} track(s) from playlist {self.PlaylistId}')
+
+        playlist_chunks = Utilities.chunker(tracks_to_remove, 10)
+        endpoint = Utilities.GetRemoveTracksEndpoint(self.PlaylistId)
         headers = {"Authorization": f"Bearer {self.__access_token}"}
 
-        response = requests.post(endpoint, headers=headers)
-        if not response.ok:
-            self.__handle_error(response)
-            self.AddTracks(track_ids=track_ids)
-            return
+        for chunk in playlist_chunks:
+            track_uris = [{"uri": f"spotify:track:{track_id}"} for track_id in playlist_chunks]
+
+            # I don't know why, but spotify complains unless this format is used here
+            body = str({"tracks": track_uris}).replace("'", '\"')
+
+            response = requests.delete(endpoint, headers=headers, data=body)
+            if not response.ok:
+                self.__handle_error(response)
+                self.AddTracks(track_ids=track_ids)
+                return
 
         # Update internal track list
         self.__all_tracks = self.GetAllTracks(force_refresh=True)

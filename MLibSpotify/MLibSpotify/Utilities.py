@@ -8,6 +8,9 @@ import requests
 
 TrackApiBase = 'https://api.spotify.com/v1/tracks/'
 
+def GetAllPlaylistsEndpoint():
+    return 'https://api.spotify.com/v1/me/playlists'
+
 
 def GetPlaylistTracksEndpoint(playlist_id):
     return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks'
@@ -20,6 +23,14 @@ def GetPlaylistEndpoint(playlist_id):
 def GetAddTracksEndpoint(playlist_id, tracks):
     uris = '%2C'.join([f'spotify%3Atrack%3A{track}' for track in tracks])
     return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?uris={uris}'
+
+
+def chunker(seq, size):
+    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
+
+
+def GetRemoveTracksEndpoint(playlist_id):
+    return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks'
 
 
 def EncodeAuthorization(client_id, client_secret):

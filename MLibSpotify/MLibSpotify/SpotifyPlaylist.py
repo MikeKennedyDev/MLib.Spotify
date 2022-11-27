@@ -1,11 +1,14 @@
 import requests
 
-from MLibSpotify import Utilities, Links
+from MLibSpotify import Utilities, Links, Authorization
 
 # region Fields
 
 base_spotify_api = 'https://api.spotify.com/v1/'
-
+__refresh_token = None
+__access_token = None
+__client_id = None
+__client_secret = None
 
 # endregion
 
@@ -16,10 +19,6 @@ class SpotifyPlaylist:
     PlaylistId = None
     PlaylistName = None
     __all_tracks = []
-    __refresh_token = None
-    __access_token = None
-    __client_id = None
-    __client_secret = None
 
     # endregion
 
@@ -31,16 +30,19 @@ class SpotifyPlaylist:
                  client_secret,
                  refresh_token):
 
+        global __refresh_token, __client_id, __client_secret, __access_token
+
         # Initialize playlist values
         self.PlaylistId = playlist_id
-        self.__refresh_token = refresh_token
-        self.__client_id = client_id
-        self.__client_secret = client_secret
+        __refresh_token = refresh_token
+        __client_id = client_id
+        __client_secret = client_secret
 
         # Populate playlist data
         self.PlaylistName = self.GetPlaylistName()
         self.PlaylistUrl = Links.GetSpotifyPlaylistUrl(self.PlaylistId)
         self.__refresh_access_token()
+        __access_token = Authorization.RefreshAccessToken(__client_id, __client_secret, __refresh_token)
         self.__all_tracks = self.GetAllTracks(force_refresh=True)
 
         print(f'Playlist object created for playlist {playlist_id} and populated with {len(self.__all_tracks)} tracks.')
@@ -61,12 +63,13 @@ class SpotifyPlaylist:
         return response.json()["name"]
 
     def GetAllTracks(self, force_refresh=False):
+        global __access_token
 
         if not force_refresh and self.__all_tracks:
             return self.__all_tracks
 
         endpoint = Utilities.GetPlaylistTracksEndpoint(self.PlaylistId)
-        headers = {"Authorization": f"Bearer {self.__access_token}"}
+        headers = {"Authorization": f"Bearer {__access_token}"}
         response = requests.get(endpoint, headers=headers)
 
         # Error handling
@@ -80,22 +83,61 @@ class SpotifyPlaylist:
 
     def AddTracks(self, track_ids):
 
+        # Refresh tracks before add
+        self.__all_tracks = self.GetAllTracks(force_refresh=True)
+
         playlist_track_ids = [track['id'] for track in self.__all_tracks]
         tracks_to_add = list(set(track_ids) - set(playlist_track_ids))
-        print(tracks_to_add)
+
         if len(tracks_to_add) == 0:
             raise Exception('Specified tracks already in playlist.')
 
         print(f'Adding {len(tracks_to_add)} track(s) to playlist {self.PlaylistId}')
 
-        endpoint = Utilities.GetAddTracksEndpoint(self.PlaylistId, tracks=tracks_to_add)
+        headers = {"Authorization": f"Bearer {self.__access_token}"}
+        playlist_chunks = Utilities.chunker(tracks_to_add, 10)
+
+        for chunk in playlist_chunks:
+            endpoint = Utilities.GetAddTracksEndpoint(self.PlaylistId, tracks=chunk)
+            response = requests.post(endpoint, headers=headers)
+            if not response.ok:
+                self.__handle_error(response)
+                self.AddTracks(track_ids=track_ids)
+                return
+
+
+
+
+        # Update internal track list
+        self.__all_tracks = self.GetAllTracks(force_refresh=True)
+
+    def RemoveTracks(self, track_ids):
+
+        # Refresh tracks
+        self.__all_tracks = self.GetAllTracks(force_refresh=True)
+
+        playlist_track_ids = [track['id'] for track in self.__all_tracks]
+        tracks_to_remove = [value for value in track_ids if value in playlist_track_ids]
+        if len(tracks_to_remove) == 0:
+            raise Exception('Tracks not found in playlist.')
+
+        print(f'Removing {len(tracks_to_remove)} track(s) from playlist {self.PlaylistId}')
+
+        playlist_chunks = Utilities.chunker(tracks_to_remove, 10)
+        endpoint = Utilities.GetRemoveTracksEndpoint(self.PlaylistId)
         headers = {"Authorization": f"Bearer {self.__access_token}"}
 
-        response = requests.post(endpoint, headers=headers)
-        if not response.ok:
-            self.__handle_error(response)
-            self.AddTracks(track_ids=track_ids)
-            return
+        for chunk in playlist_chunks:
+            track_uris = [{"uri": f"spotify:track:{track_id}"} for track_id in playlist_chunks]
+
+            # I don't know why, but spotify complains unless this format is used here
+            body = str({"tracks": track_uris}).replace("'", '\"')
+
+            response = requests.delete(endpoint, headers=headers, data=body)
+            if not response.ok:
+                self.__handle_error(response)
+                self.AddTracks(track_ids=track_ids)
+                return
 
         # Update internal track list
         self.__all_tracks = self.GetAllTracks(force_refresh=True)
@@ -135,3 +177,11 @@ class SpotifyPlaylist:
         self.__access_token = response.json()['access_token']
 
     # endregion
+
+def GetAllUserPlaylists(access_token):
+    endpoint = Utilities.GetAllPlaylistsEndpoint()
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.get(endpoint, headers=headers)
+
+    print('checkin')
+    return

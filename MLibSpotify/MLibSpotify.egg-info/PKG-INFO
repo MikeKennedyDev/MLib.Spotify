@@ -1,9 +1,11 @@
 Metadata-Version: 2.1
 Name: MLibSpotify
-Version: 2.1.15
+Version: 2.1.20
 Summary: Library for use in personal spotify account
+Home-page: UNKNOWN
 Author: MikeKennedyDev
 License: MIT
+Platform: UNKNOWN
 Classifier: Intended Audience :: Developers
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python
@@ -16,3 +18,4 @@ Classifier: Operating System :: OS Independent
 Description-Content-Type: text/markdown
 
 Tmp => fill out later
+
