@@ -8,12 +8,12 @@ import requests
 
 TrackApiBase = 'https://api.spotify.com/v1/tracks/'
 
-def GetAllPlaylistsEndpoint():
-    return 'https://api.spotify.com/v1/me/playlists'
+def GetAllPlaylistsEndpoint(limit=20, offset=0):
+    return f'https://api.spotify.com/v1/me/playlists?limit={limit}&offset={offset}'
 
 
-def GetPlaylistTracksEndpoint(playlist_id):
-    return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks'
+def GetPlaylistTracksEndpoint(playlist_id, limit=100, offset=0):
+    return f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks?limit={limit}&offset={offset}'
 
 
 def GetPlaylistEndpoint(playlist_id):

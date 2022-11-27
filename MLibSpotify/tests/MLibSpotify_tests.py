@@ -4,11 +4,13 @@ from dotenv import load_dotenv
 import MLibSpotify.Links
 import Utilities as Util
 from MLibSpotify.SpotifyPlaylist import SpotifyPlaylist, GetAllUserPlaylists
+from MLibSpotify import Authorization
 
 load_dotenv()
 
 # region Fields
 
+TestAuth = None
 TestPlaylist = None
 TestPlaylistId = '2UmDYQxgIDaKikeG53Ffd5'
 TestTrackIds = ['56rgqDNRIqKq0qIMdu7r4r', '1rWzYSHyZ5BiI4DnDRCwy7']
@@ -23,12 +25,14 @@ TestTrackUri = 'https://api.spotify.com/v1/tracks/0irYSFrgXf2OH1F5NAdK6I'
 # region Test Methods
 
 def AuthorizationTest():
-    global TestPlaylist
+    global TestPlaylist, TestAuth
+
+    TestAuth = Authorization.Authorization(client_id=os.getenv("CLIENT_ID"),
+                                           client_secret=os.getenv("CLIENT_SECRET"),
+                                           refresh_token=os.getenv("REFRESH_TOKEN"))
 
     TestPlaylist = SpotifyPlaylist(playlist_id=TestPlaylistId,
-                                   client_id=os.getenv("CLIENT_ID"),
-                                   client_secret=os.getenv("CLIENT_SECRET"),
-                                   refresh_token=os.getenv("REFRESH_TOKEN"))
+                                   auth=TestAuth)
 
     assert TestPlaylist is not None
     print('AuthorizationTest success')
@@ -50,16 +54,6 @@ def AddRemoveTrackTest():
     print(f'Playlist has {original_num_tracks} tracks.')
 
     try:
-        TestPlaylist.AddTracks(TestTrackIds)
-        new_num_tracks = len(TestPlaylist.GetAllTracks(force_refresh=True))
-        assert new_num_tracks == (original_num_tracks + len(TestTrackIds))
-
-        TestPlaylist.RemoveTracks(TestTrackIds)
-        new_num_tracks = len(TestPlaylist.GetAllTracks(force_refresh=True))
-        assert new_num_tracks == original_num_tracks
-
-    except:
-        print('excepting')
         TestPlaylist.RemoveTracks(TestTrackIds)
         print('Tracks removed')
         new_num_tracks = len(TestPlaylist.GetAllTracks(force_refresh=True))
@@ -69,6 +63,19 @@ def AddRemoveTrackTest():
         TestPlaylist.AddTracks(TestTrackIds)
         new_num_tracks = len(TestPlaylist.GetAllTracks(force_refresh=True))
         assert new_num_tracks == original_num_tracks
+
+
+    except:
+        print('excepting')
+
+        TestPlaylist.AddTracks(TestTrackIds)
+        new_num_tracks = len(TestPlaylist.GetAllTracks(force_refresh=True))
+        assert new_num_tracks == (original_num_tracks + len(TestTrackIds))
+
+        TestPlaylist.RemoveTracks(TestTrackIds)
+        new_num_tracks = len(TestPlaylist.GetAllTracks(force_refresh=True))
+        assert new_num_tracks == original_num_tracks
+
 
     print(f'{len(TestTrackIds)} tracks added/removed successfully')
 
@@ -132,10 +139,13 @@ def ExceptionsTest():
 
     print('All exceptions thrown')
 
+
 def GetAllUserPlaylistsTest():
-    all_playlists = GetAllUserPlaylists(os.getenv("REFRESH_TOKEN"))
-    for playlist in all_playlists:
-        None
+    global TestAuth
+
+    all_playlists = GetAllUserPlaylists(TestAuth)
+    # for playlist in all_playlists:
+    #     None
 
 
 # endregion
@@ -145,11 +155,11 @@ def GetAllUserPlaylistsTest():
 # __logger.Info('Starting Spotify Tests')
 print('Starting spotify tests')
 AuthorizationTest()
-GetTracksTest()
-# AddRemoveTrackTest()
-GetUrlTest()
-ExceptionsTest()
-# GetAllUserPlaylistsTest()
+# GetTracksTest()
+# # AddRemoveTrackTest()
+# GetUrlTest()
+# ExceptionsTest()
+GetAllUserPlaylistsTest()
 
 # endregion
 

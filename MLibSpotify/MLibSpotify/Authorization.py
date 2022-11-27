@@ -1,69 +1,78 @@
 import requests
 from MLibSpotify import Utilities
 
-# region Fields
 
-__access_token = None
-__client_id = None
-__client_secret = None
-__refresh_token = None
+class Authorization:
+    # region Fields
 
-# endregion Fields
+    __access_token = None
+    __client_id = None
+    __client_secret = None
+    __refresh_token = None
 
-# region constructors
+    # endregion Fields
 
-def __init__(self,
-             client_id,
-             client_secret,
-             refresh_token,
-             access_token=None,
-             force_refresh=False):
-    global __access_token, __refresh_token, __client_secret, __client_id
+    # region Constructors
 
-    __client_secret = client_secret
-    __client_id = client_id
-    __refresh_token = refresh_token
+    def __init__(self,
+                 client_id,
+                 client_secret,
+                 refresh_token,
+                 access_token=None,
+                 force_refresh=False):
 
-    if access_token:
-        __access_token = access_token
-    elif not __access_token:
-        print('Creating new access token')
-        # TODO: get access token
+        self.__client_secret = client_secret
+        self.__client_id = client_id
+        self.__refresh_token = refresh_token
 
-# endregion Constructors
+        if access_token and not force_refresh:
+            __access_token = access_token
 
-# region Methods
+        if not self.__validate_access_token():
+            self.__refresh_access_token()
+            if not self.__validate_access_token():
+                raise Exception("Invalid auth token.")
 
-def RefreshAccessToken(client_id,
-                       client_secret,
-                       refresh_token,
-                       access_token=None,
-                       force_refresh=False):
-    global AccessToken
+    # endregion Constructors
 
-    # TODO: Validate access token works
-    if not force_refresh and AccessToken:
-        return AccessToken
+    # region Methods
 
-    request_headers = {
-        "Authorization": Utilities.EncodeAuthorization(client_id,
-                                                       client_secret),
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
+    def GetAccessToken(self):
+        self.__validate_access_token()
+        return self.__access_token
 
-    request_body = {
-        "grant_type": "refresh_token",
-        "refresh_token": refresh_token
-    }
+    def __validate_access_token(self):
 
-    response = requests.post("https://accounts.spotify.com/api/token",
-                             headers=request_headers,
-                             data=request_body)
+        request_headers = {
+            "Authorization": f"Bearer {self.__access_token}",
+            "Content-Type": "application/json"
+        }
 
-    if not response.ok:
-        raise Exception(f"Error refreshing access token: {response.json()['error']}")
+        response = requests.get("https://api.spotify.com/v1/me",
+                                headers=request_headers)
 
-    AccessToken = response.json()['access_token']
-    return AccessToken
+        return response.status_code == 200
 
-# endregion Methods
+    def __refresh_access_token(self):
+
+        request_headers = {
+            "Authorization": Utilities.EncodeAuthorization(self.__client_id,
+                                                           self.__client_secret),
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+
+        request_body = {
+            "grant_type": "refresh_token",
+            "refresh_token": self.__refresh_token
+        }
+
+        response = requests.post("https://accounts.spotify.com/api/token",
+                                 headers=request_headers,
+                                 data=request_body)
+
+        if not response.ok:
+            raise Exception(f"Error refreshing access token: {response.json()['error']}")
+
+        self.__access_token = response.json()['access_token']
+
+    # endregion Methods
